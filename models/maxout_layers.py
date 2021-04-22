@@ -21,8 +21,8 @@ class MaxoutDense1D(keras.layers.Layer):
 
 class Maxout1D(keras.layers.Layer):
     
-    def __init__(self, output_units, units=2):
-        super(Maxout1D, self).__init__()
+    def __init__(self, output_units, units=2, name=None):
+        super(Maxout1D, self).__init__(name=name)
         self.units=units
         self.output_units = output_units
         

@@ -44,8 +44,8 @@ class Maxout1D(keras.layers.Layer):
     
     def get_config(self):
         #config = super(Maxout1D, self).get_config()
-        #config.update({"units": self.units,
-         #       "output_units": self.output_units})
+        #return  config.update({"units": self.units,
+        #            "output_units": self.output_units})
         return {"units": self.units,
               "output_units": self.output_units}
 

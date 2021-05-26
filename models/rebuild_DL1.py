@@ -37,20 +37,20 @@ def get_maxout_weights(NN_layer):
     for maxout_unit in range(units):
         maxout_weights.append(
                                 np.array(NN_layer['sublayers'][maxout_unit]['weights']
-                              ).reshape( maxout_h_unit, in_features).transpose() )
+                              ).reshape(maxout_h_unit, in_features).transpose() )
         maxout_biases.append(
                                 np.array(NN_layer['sublayers'][maxout_unit]['bias'])
                             )
     
     return (in_features, maxout_h_unit, units,
-            np.stack(maxout_weights, axis=2).reshape(in_features,maxout_h_unit*units),
-            np.stack(maxout_biases, axis=1).flatten() )
+            np.concatenate(maxout_weights, axis=-1),
+            np.concatenate(maxout_biases, axis=-1) )
    
 
 def get_dense_weights(NN_layer):
     h_unit=len(NN_layer["bias"])
     in_features = len(NN_layer['weights'])//h_unit
-    weight = np.array(NN_layer['weights']).reshape( h_unit, in_features).transpose()
+    weight = np.array(NN_layer['weights']).reshape( h_unit, in_features ).transpose()
     return (in_features, h_unit, weight, np.array(NN_layer["bias"]) )
 
 def get_BN_weights(NN_layer):
@@ -115,6 +115,7 @@ def get_DL1(N_features, dl1_layers, lr=0.005, drops=None):
                 x = keras.layers.Dropout( drops[drop_index],
                                           name="drop%s"%drop_index )(x, training=True)
                 drop_index=drop_index+1
+                
         x = layer(x)
         
     predictions = dl1_layers[-1](x)

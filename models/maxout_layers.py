@@ -35,12 +35,9 @@ class Maxout1D(keras.layers.Layer):
                                 trainable=True, name="maxout_b")
     
     def call(self, inputs):
-        Z = tf.matmul(inputs, self.w)+ self.b
-        m = tf.nn.max_pool1d(tf.reshape(Z, [-1,self.output_units*self.units, 1]),
-                             ksize = self.units,
-                            strides=self.units,
-                            padding='SAME')
-        return  tf.reshape(m, [-1,self.output_units])
+        Z = tf.reshape((tf.matmul(inputs, self.w)+ self.b), [-1, self.units, self.output_units])
+        
+        return tf.reshape(tfa.layers.Maxout(1,-2)(Z), [-1,Z.shape[-1]])
     
     def get_config(self):
         #config = super(Maxout1D, self).get_config()

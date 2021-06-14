@@ -78,9 +78,16 @@ def get_mean_score(X_test, model, N_foward=100):
             For each jet mean and stadard deviation (std) of 10K DL1 score are calculated.
             Array lenth eqaul to the batch size.
     '''
-    def _mean_score(inputs):
-        result_prob = model.predict(np.array(N_foward*[inputs]), batch_size=20000) #.numpy()
-        result = DL1_score(result_prob[:,2], result_prob[:,1], result_prob[:,0])
-        return result.mean(), result.std()
+    
+    def _scores():
+        _predict_prob = model(X_test, training=False).numpy()
+        return DL1_score(_predict_prob[:,2], _predict_prob[:,1], _predict_prob[:,0])
+        
+    _results = np.array([_scores() for i in range(N_foward)])
+            
+    #def _mean_score(inputs):
+    #    result_prob = model(np.array(N_foward*[inputs]), training=False).numpy()
+    #    result = DL1_score(result_prob[:,2], result_prob[:,1], result_prob[:,0])
+    #    return result.mean(), result.std()
 
-    return np.apply_along_axis(_mean_score,1, X_test)
+    return np.stack([np.mean(_results, axis=0),np.std(_results, axis=0)],axis=1)

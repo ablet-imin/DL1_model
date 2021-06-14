@@ -80,7 +80,7 @@ def get_mean_score(X_test, model, N_foward=100):
     '''
     
     def _scores():
-        _predict_prob = model(X_test, training=False).numpy()
+        _predict_prob = model.predict(X_test, batch_size=50000).numpy()
         return DL1_score(_predict_prob[:,2], _predict_prob[:,1], _predict_prob[:,0])
         
     _results = np.array([_scores() for i in range(N_foward)])

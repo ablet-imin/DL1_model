@@ -33,9 +33,9 @@ def efficiency_hist(test_data, model, Nbins=20, batch_size=None):
     _jetPt, _bins = np.histogram(momentum_space(test_data[:,1]), Nbins)
     _re = None
     if batch_size:
-        _re = model.predict(X_data, batch_size=batch_size)
+        _re = model.predict(test_data, batch_size=batch_size)
     else:
-        _re = model(X_data, training=False).numpy()
+        _re = model(test_data, training=False).numpy()
     _score = DL1_score(_re[:,2],_re[:,1], _re[:,0])
     #btagging
     _Htagged_jetPt, _ = np.histogram( momentum_space(test_data[(_score>1.45)][:,1]), bins=_bins)

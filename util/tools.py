@@ -64,7 +64,7 @@ def plot_prob_score_from_model(event,label, model):
     _ =ax2.hist(DL1_socre(pb, pc, pl), 100,  alpha=0.6)
     
 
-def get_mean_score(X_test, model, N_foward=100):
+def get_mean_score(X_test, model, N_foward=100, batch_size=None):
     '''
     Calculate mean score for a jet using MC dropout. Mean score is
     a mean of 10K DL1 score ontained by 10K evaluation on a sinle input.
@@ -79,8 +79,12 @@ def get_mean_score(X_test, model, N_foward=100):
             Array lenth eqaul to the batch size.
     '''
     
-    def _scores():
-        _predict_prob = model.predict(X_test, batch_size=50000).numpy()
+    def _scores(batch_size=batch_size):
+        _predict_prob =None
+        if batch_size:
+            _predict_prob = model.predict(X_test, batch_size=batch_size)
+        else:
+            _predict_prob = model(X_test, training=False).numpy()
         return DL1_score(_predict_prob[:,2], _predict_prob[:,1], _predict_prob[:,0])
         
     _results = np.array([_scores() for i in range(N_foward)])

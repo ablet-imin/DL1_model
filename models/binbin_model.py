@@ -1,11 +1,12 @@
-from keras.models import Sequential
-from keras.optimizers import Adam
-from keras.layers.normalization import BatchNormalization
-from keras.layers import Dense, Activation
-import keras
-from keras import backend as K
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import Dense, Activation
+import tensorflow.keras as keras
+from tensorflow.keras import backend as K
 
-class Dropout(keras.layers.Dropout):
+class Dropout(tf.keras.layers.Dropout):
 	"""Applies Dropout to the input.
 	Dropout consists in randomly setting
 	a fraction `rate` of input units to 0 at each update during training time,

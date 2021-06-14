@@ -18,7 +18,7 @@ def momentum_space(X):
     Momentum_space = X/scaling - shift
     return Momentum_space/1000. #GeV unit
 
-def efficiency_hist(test_data, model, Nbins=20, batch_size=None):
+def efficiency_hist(test_data, model, Nbins=20, batch_size=None, wp_cut=1.21):
     '''
     efficiency_hist(test_data, model, Nbins=20)
     calculate tagged efficiancy.
@@ -38,11 +38,11 @@ def efficiency_hist(test_data, model, Nbins=20, batch_size=None):
         _re = model(test_data, training=False).numpy()
     _score = DL1_score(_re[:,2],_re[:,1], _re[:,0])
     #btagging
-    _Htagged_jetPt, _ = np.histogram( momentum_space(test_data[(_score>1.45)][:,1]), bins=_bins)
-    
+    _Htagged_jetPt, _ = np.histogram( momentum_space(test_data[(_score>wp_cut)][:,1]), bins=_bins)
+    del _score, _re
     return _Htagged_jetPt/_jetPt #efficiency
 
-def efficiecy_mean_std(test_data, model, N_forward=30, Nbins=20, batch_size=None):
+def efficiecy_mean_std(test_data, model, N_forward=30, Nbins=20, batch_size=None, wp_cut=1.21):
     '''
     mean and std of efficiencies. Efficiency histogram is calculated K times using
     a MC dropout enabled model.
@@ -59,7 +59,7 @@ def efficiecy_mean_std(test_data, model, N_forward=30, Nbins=20, batch_size=None
     '''
     _hist_effs = []
     for i in range(0, N_forward):
-        _hist_effs.append(efficiency_hist(test_data, model, Nbins=Nbins, batch_size=batch_size) )
+        _hist_effs.append(efficiency_hist(test_data, model, Nbins=Nbins, batch_size=batch_size, wp_cut) )
     
     return np.mean(_hist_effs, axis=0).flatten(), np.std(_hist_effs, axis=0).flatten()
             

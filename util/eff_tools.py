@@ -2,6 +2,8 @@
 import numpy as np
 from util import DL1_score
 
+import gc
+
 def momentum_space(X):
     '''
     momentum_space(X)
@@ -60,6 +62,8 @@ def efficiecy_mean_std(test_data, model, N_forward=30, Nbins=20, batch_size=None
     _hist_effs = []
     for i in range(0, N_forward):
         _hist_effs.append(efficiency_hist(test_data, model, Nbins=Nbins, batch_size=batch_size, wp_cut=wp_cut) )
+        
+        gc.collect()
     
     return np.mean(_hist_effs, axis=0).flatten(), np.std(_hist_effs, axis=0).flatten()
             

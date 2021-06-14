@@ -79,7 +79,7 @@ def get_mean_score(X_test, model, N_foward=100):
             Array lenth eqaul to the batch size.
     '''
     def _mean_score(inputs):
-        result_prob = model(np.array(N_foward*[inputs]), training=False).numpy()
+        result_prob = model.predict(np.array(N_foward*[inputs]), batch_size=20000).numpy()
         result = DL1_score(result_prob[:,2], result_prob[:,1], result_prob[:,0])
         return result.mean(), result.std()
 

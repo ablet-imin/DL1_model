@@ -1,6 +1,7 @@
 
 import numpy as np
 from util import DL1_score
+import pandas as pd
 
 import gc
 
@@ -60,10 +61,29 @@ def efficiecy_mean_std(test_data, model, N_forward=30, Nbins=20, batch_size=None
             std - numpy array, std of each bin.
     '''
     _hist_effs = []
-    for i in range(0, N_forward):
-        _hist_effs.append(efficiency_hist(test_data, model, Nbins=Nbins, batch_size=batch_size, wp_cut=wp_cut) )
-        
-        gc.collect()
     
-    return np.mean(_hist_effs, axis=0).flatten(), np.std(_hist_effs, axis=0).flatten()
+    score_mean = get_mean_score(test_data, model, N_foward=N_forward, batch_size=batch_size)
+    
+    data_pd = pd.DataFrame(data={'pT':momentum_space(test_data[:,1]),
+                             'score':score_mean[:,0], 'std':score_mean[:,1]})
+    
+    #binning
+    _Hpretag_jetPt,  _bins = np.histogram( momentum_space(test_data[:,1]), bins=Nbins)
+    _Htagged_jetPt, _ = np.histogram( momentum_space(test_data[(score_mean[:,0]>wp_cut)][:,1]), bins=_bins)
+    
+    data_pd['bins'] = pd.cut(data_pd.pT, bins=_bins, labels=range(len(_bins)-1))
+    
+    def _variance(bin=0):
+        filters = data_pd['bins']==bin
+        stds = data_pd[filters]['std'].to_numpy()
+        return np.sqrt(np.sum(stds**2))/len(stds)
+        
+    vars = np.array([_variance(bin=i) for i in range(len(_bins)-1)] )
+    
+    #for i in range(0, N_forward):
+    #    _hist_effs.append(efficiency_hist(test_data, model, Nbins=Nbins, batch_size=batch_size, wp_cut=wp_cut) )
+        
+    gc.collect()
+    
+    return _Htagged_jetPt/_Hpretag_jetPt, vars.flatten()
             

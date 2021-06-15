@@ -44,8 +44,30 @@ def efficiency_hist(test_data, model, Nbins=20, batch_size=None, wp_cut=1.21):
     _Htagged_jetPt, _ = np.histogram( momentum_space(test_data[(_score>wp_cut)][:,1]), bins=_bins)
     del _score, _re
     return _Htagged_jetPt/_jetPt #efficiency
-
+    
+    
 def efficiecy_mean_std(test_data, model, N_forward=30, Nbins=20, batch_size=None, wp_cut=1.21):
+    '''
+    mean and std of efficiencies. Efficiency histogram is calculated K times using
+    a MC dropout enabled model.
+    efficiecy_mean_std(test_data, model, N_forward)
+    arg:
+       test_data - collection of jet features as inputs.
+       model - trained model, dropout enabled for test.
+       N_forward - number evaluation with CM dropout.
+       Nbins - number of bins for binning.
+       
+    return: mean, std
+            mean - numpy array, content of each bin.
+            std - numpy array, std of each bin.
+    '''
+    _hist_effs = []
+    for i in range(0, N_forward):
+        _hist_effs.append(efficiency_hist(test_data, model, Nbins=Nbins, batch_size=batch_size, wp_cut=wp_cut) )
+    
+    return np.mean(_hist_effs, axis=0).flatten(), np.std(_hist_effs, axis=0).flatten()
+
+def efficiecy_from_mean(test_data, model, N_forward=30, Nbins=20, batch_size=None, wp_cut=1.21):
     '''
     mean and std of efficiencies. Efficiency histogram is calculated K times using
     a MC dropout enabled model.

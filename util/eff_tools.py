@@ -1,6 +1,6 @@
 
 import numpy as np
-from util import DL1_score, get_mean_score, momentum_space
+from util import DL1_score, get_mean_score
 import pandas as pd
 
 import gc

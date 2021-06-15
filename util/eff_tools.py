@@ -43,6 +43,7 @@ def efficiency_hist(test_data, model, Nbins=20, batch_size=None, wp_cut=1.21):
     #btagging
     _Htagged_jetPt, _ = np.histogram( momentum_space(test_data[(_score>wp_cut)][:,1]), bins=_bins)
     del _score, _re
+    gc.collect()
     return _Htagged_jetPt/_jetPt #efficiency
     
     
@@ -64,7 +65,7 @@ def efficiecy_mean_std(test_data, model, N_forward=30, Nbins=20, batch_size=None
     _hist_effs = []
     for i in range(0, N_forward):
         _hist_effs.append(efficiency_hist(test_data, model, Nbins=Nbins, batch_size=batch_size, wp_cut=wp_cut) )
-    
+        gc.collect()
     return np.mean(_hist_effs, axis=0).flatten(), np.std(_hist_effs, axis=0).flatten()
 
 def efficiecy_from_mean(test_data, model, N_forward=30, Nbins=20, batch_size=None, wp_cut=1.21):
@@ -83,7 +84,13 @@ def efficiecy_from_mean(test_data, model, N_forward=30, Nbins=20, batch_size=Non
             std - numpy array, std of each bin.
     '''
     
-    score_mean = get_mean_score(test_data, model, N_foward=N_forward, batch_size=batch_size)
+    score_mean=[]
+    jet_batch = test_data.shape[0]//100000 + 1
+    for i in range(jet_batch):
+        score_mean.append(get_mean_score(test_data[100000*i:100000*(i+1)], model, N_foward=N_forward, batch_size=batch_size) )
+        gc.collect()
+    score_mean = np.concatenate(score_mean, axis=0)
+    
     sc_filter = (score_mean[:,0]>wp_cut)
     
     data_pd = pd.DataFrame(data={'pT':momentum_space(test_data[sc_filter][:,1]),

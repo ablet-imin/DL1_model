@@ -83,9 +83,9 @@ def efficiecy_from_mean(test_data, model, N_forward=30, Nbins=20, batch_size=Non
             mean - numpy array, content of each bin.
             std - numpy array, std of each bin.
     '''
-    
+    dtaset_size = test_data.shape[0]
     score_mean=[]
-    jet_batch = test_data.shape[0]//100000 + 1
+    jet_batch = dtaset_size//100000 + 1
     for i in range(jet_batch):
         score_mean.append(get_mean_score(test_data[100000*i:100000*(i+1)], model, N_foward=N_forward, batch_size=batch_size) )
         gc.collect()
@@ -105,7 +105,7 @@ def efficiecy_from_mean(test_data, model, N_forward=30, Nbins=20, batch_size=Non
     def _variance(bin=0):
         filters = data_pd['bins']==bin
         stds = data_pd[filters]['std'].to_numpy()
-        return np.sqrt(np.sum(stds**2))/len(stds)
+        return np.sqrt(np.sum(stds**2))/dtaset_size
         
     vars = np.array([_variance(bin=i) for i in range(len(_bins)-1)] )
         

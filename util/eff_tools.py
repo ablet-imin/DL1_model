@@ -105,7 +105,7 @@ def efficiecy_from_mean(test_data, model, N_forward=30, Nbins=20, batch_size=Non
     def _variance(bin=0):
         filters = data_pd['bins']==bin
         stds = data_pd[filters]['std'].to_numpy()
-        return np.sqrt(np.sum(stds**2))/dtaset_size
+        return np.sqrt(np.sum(stds**2))/_Hpretag_jetPt[bin]
         
     vars = np.array([_variance(bin=i) for i in range(len(_bins)-1)] )
         

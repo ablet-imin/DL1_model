@@ -5,19 +5,21 @@ import pandas as pd
 
 import gc
 
-def momentum_space(X):
+def momentum_space(X, shift = -159402.65625, scale = 4.1431180575664244e-06):
     '''
     momentum_space(X)
     convert normalized momentum to normal momentum space.
     inputs:
         X - normalized pT. X can be numpy array with argbitrary
             batch size.
+        shift - shift center of X.
+        scale - scale values of X.
         
     return:
         Momentum in GeV unit.
     '''
-    shift = -159402.65625
-    scaling = 4.1431180575664244e-06
+    shift = shift
+    scaling = scale
     Momentum_space = X/scaling - shift
     return Momentum_space/1000. #GeV unit
 

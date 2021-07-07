@@ -64,7 +64,7 @@ def plot_prob_score_from_model(event,label, model):
     _ =ax2.hist(DL1_socre(pb, pc, pl), 100,  alpha=0.6)
     
 
-def get_mean_score(X_test, model, N_foward=100, batch_size=None):
+def get_mean_score(X_test, model, N_foward=100, batch_size=None, median=False):
     '''
     Calculate mean score for a jet using MC dropout. Mean score is
     a mean of 10K DL1 score ontained by 10K evaluation on a sinle input.
@@ -93,5 +93,60 @@ def get_mean_score(X_test, model, N_foward=100, batch_size=None):
     #    result_prob = model(np.array(N_foward*[inputs]), training=False).numpy()
     #    result = DL1_score(result_prob[:,2], result_prob[:,1], result_prob[:,0])
     #    return result.mean(), result.std()
+    np_stat = np.mean
+    if median:
+        np_stat = np.median
 
-    return np.stack([np.mean(_results, axis=0),np.std(_results, axis=0)],axis=1)
+    return np.stack([np_stat(_results, axis=0),np.std(_results, axis=0)],axis=1)
+    
+
+
+
+
+def get_mode_from_root(File_path="BTagCalibRUN2-08-40.root:DL1/AntiKt4EMTopo/net_configuration"):
+    #filename.root:Tdirectory/directory/obj
+    #File_path="BTagCalibRUN2-08-40.root:DL1/AntiKt4EMTopo/net_configuration"
+    import models.rebuild_DL1 as DL1
+
+    DL1_struct = DL1.get_net_struct(File_path)
+    DL1_weights = DL1_struct['layers']
+
+    #DL1_layers = [ 72, 57, 60, 48, 36,24, 12, 6]
+    DL1_dropouts = [0.1, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
+
+    #findout input size, and weight matrix for each layer.
+    #create corresponding tensorflow layers and store them in a list.
+    features, dl1_layers, dl1_weights = DL1.pars_layers(DL1_struct['layers'])
+
+    _model = DL1.get_DL1(features , dl1_layers, drops=None )
+    _model_dropout = DL1.get_DL1(features , dl1_layers, drops=DL1_dropouts )
+    #model.summary()
+    DL1.set_dl1_weights(model=_model, weights=dl1_weights)
+    DL1.set_dl1_weights(model=_model_dropout, weights=dl1_weights)
+    return _model, _model_dropout
+
+def load_trained(model_weight):
+    import models.binbin_model as binbin_model
+    test_model = binbin_model.DL1_model(InputShape=44, training=False)
+    test_model_Dropout = binbin_model.DL1_model(InputShape=44, training=True)
+    test_model.load_weights(model_weight)
+    test_model_Dropout.load_weights(model_weight)
+    return test_model, test_model_Dropout
+
+def data_category(data, label,category='b'):
+    #1 is b, 2 is c, 4 is light
+    label_binary = {'b':2, 'c':1, 'l':0}
+    label_index = label_binary[category]
+    label_filter = (label[:,label_index]==1)
+    print(label_filter)
+    return data[label_filter], label[label_filter]
+    
+
+#get test dataset
+def get_dataset(path):
+    hf = h5py.File(path, 'r')
+    X_all, Y_all = hf['X_test'][:], hf['Y_test'][:]
+    hf.close()
+    X, Y = data_category(X_all, Y_all,category='b')
+    del X_all, Y_all
+    return X, Y

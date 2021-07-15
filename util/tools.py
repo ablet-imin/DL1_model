@@ -64,7 +64,7 @@ def plot_prob_score_from_model(event,label, model):
     _ =ax2.hist(DL1_socre(pb, pc, pl), 100,  alpha=0.6)
     
 
-def get_mean_score(X_test, model, N_foward=100, batch_size=None, median=False):
+def get_mean_score(X_test, model, N_foward=100, batch_size=None, median=False, mask_sc=None):
     '''
     Calculate mean score for a jet using MC dropout. Mean score is
     a mean of 10K DL1 score ontained by 10K evaluation on a sinle input.
@@ -88,16 +88,21 @@ def get_mean_score(X_test, model, N_foward=100, batch_size=None, median=False):
         return DL1_score(_predict_prob[:,2], _predict_prob[:,1], _predict_prob[:,0])
         
     _results = np.array([_scores() for i in range(N_foward)])
-            
+    
+    
+    if mask_sc:
+        _results = np.ma.masked_equal(_results,mask_sc)
+        
+    
     #def _mean_score(inputs):
     #    result_prob = model(np.array(N_foward*[inputs]), training=False).numpy()
     #    result = DL1_score(result_prob[:,2], result_prob[:,1], result_prob[:,0])
     #    return result.mean(), result.std()
-    np_stat = np.mean
+    np_stat = np.ma.mean
     if median:
-        np_stat = np.median
+        np_stat = np.ma.median
 
-    return np.stack([np_stat(_results, axis=0),np.std(_results, axis=0)],axis=1)
+    return np.stack([np_stat(_results, axis=0),np.ma.std(_results, axis=0)],axis=1)
     
 
 
